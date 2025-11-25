@@ -1,0 +1,27 @@
+.category-management {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.categories-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.categories-table th,
+.categories-table td {
+  border-bottom: 1px solid #ddd;
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.categories-table thead {
+  background-color: #f7efe0;
+  color: #3f2a17;
+}
+
+.categories-table tbody tr:hover {
+  background-color: #f1f1f1;
+}

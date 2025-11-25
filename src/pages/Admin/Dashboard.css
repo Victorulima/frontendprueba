@@ -1,0 +1,90 @@
+.admin-dashboard {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 8px;
+  color: #333;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.admin-title {
+  text-align: center;
+  color: #3f2a17;
+  font-family: 'Cinzel', serif;
+}
+
+.admin-subtitle {
+  text-align: center;
+  color: #5b4632;
+  margin-bottom: 2rem;
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.card {
+  background-color: #f7efe0;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid #e0d8c7;
+}
+
+.card-title {
+  margin: 0 0 0.5rem 0;
+  color: #6b4b2a;
+  font-size: 1.1rem;
+}
+
+.card-value {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #3f2a17;
+}
+
+.admin-section {
+  margin-top: 2rem;
+}
+
+.section-title-admin {
+  color: #3f2a17;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.period-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group input[type="date"] {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.admin-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: none;
+  background-color: #6b4b2a;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  align-self: flex-end;
+}

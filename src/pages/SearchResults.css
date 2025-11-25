@@ -1,0 +1,93 @@
+.search-results-page {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+.search-title {
+  font-family: 'Cinzel', serif;
+  color: #3f2a17;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.search-layout {
+  display: flex;
+  flex-direction: column; /* Apilado en móviles */
+  gap: 2rem;
+}
+/* Cambia a fila en pantallas más grandes */
+@media (min-width: 768px) {
+  .search-layout {
+    flex-direction: row;
+  }
+}
+.search-filters {
+  width: 100%; /* Ocupa todo el ancho en móviles */
+  flex-shrink: 0;
+  background-color: #fff8ec;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e6d9bf;
+  align-self: flex-start;
+}
+/* Ancho fijo en pantallas más grandes */
+@media (min-width: 768px) {
+  .search-filters {
+    width: 220px;
+  }
+}
+.search-filters h3 {
+  margin-top: 0;
+  border-bottom: 1px solid #e6d9bf;
+  padding-bottom: 0.5rem;
+}
+.search-filters button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.search-filters button:hover {
+  background-color: #f7efe0;
+}
+.search-filters button.active {
+  background-color: #b8860b;
+  color: white;
+  font-weight: bold;
+}
+.search-filters hr {
+  border: none;
+  border-top: 1px solid #e6d9bf;
+  margin: 1rem 0;
+}
+.sort-select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #c7b39b;
+}
+.search-products {
+  flex-grow: 1;
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.pagination button {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #613f23;
+  cursor: pointer;
+  background: #7b4f2a;
+  color: #fff;
+}
+.pagination button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

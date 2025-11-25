@@ -1,0 +1,149 @@
+.home-page-final {
+  width: 100%;
+}
+
+.hero-section {
+  background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://t4.ftcdn.net/jpg/08/54/60/93/360_F_854609375_R2tatsf1snTeSeqk8hWDTEo2xmjxvLm0.jpg');
+  background-size: cover;
+  background-position: center;
+  padding: 5rem 1rem;
+  text-align: center;
+  color: white;
+}
+
+.hero-title {
+  font-family: 'Cinzel', serif;
+  font-size: 3.5rem;
+  margin: 0 0 1rem 0;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+}
+
+.home-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.home-section {
+  margin-bottom: 3rem;
+}
+
+.home-section-title {
+  font-family: 'Cinzel', serif;
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  color: #3f2a17;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.category-panel-link {
+    text-decoration: none;
+}
+
+.category-panel {
+  background-color: #f7efe0;
+  border: 1px solid #c7b39b;
+  padding: 3rem 1rem;
+  border-radius: 8px;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.category-panel:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.category-panel h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #3f2a17;
+}
+
+.category-panel.small {
+    padding: 2rem 1rem;
+}
+
+.product-grid-home {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.bottom-section {
+    border-top: 2px solid #e6d9bf;
+    padding-top: 2rem;
+    margin-top: 2rem;
+}
+
+.footer-final {
+  background-color: #3a2412;
+  color: #f7efe0;
+  text-align: center;
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+.footer-links {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.footer-links a {
+  color: #f7efe0;
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+.ad-banner {
+  background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQi5O7gCAjZReHQb7HsgbDgX40Z8kSbkUqrhA&s');
+  background-size: cover;
+  background-position: center;
+  padding: 3rem 1.5rem;
+  margin: 3rem 0;
+  text-align: center;
+  color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.ad-banner-content h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 2.5rem;
+  margin: 0 0 1rem 0;
+  color: #FFD700; 
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
+}
+
+.ad-banner-button {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.8rem 1.8rem;
+  background-color: #b8860b;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: transform 0.2s, background-color 0.2s;
+  border: 1px solid #FFD700;
+}
+
+.ad-banner-button:hover {
+  transform: scale(1.05);
+  background-color: #cca32b;
+}
