@@ -63,22 +63,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
      Busca email + password en localStorage
   =========================== */
   const login = async (email: string, password: string): Promise<AuthResult> => {
-    const users = readStoredUsers();
-    const found = users.find(u => u.email === email && u.password === password);
 
-    if (!found) return { success: false, message: "Correo o contraseña incorrectos" };
+  const resp = await fetch(`http://localhost:3000/api/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ correo: email })
+  });
 
-    const publicUser: PublicUser = {
-      id: found.id,
-      name: found.name,
-      email: found.email,
-    };
+  if (!resp.ok) {
+    return { success: false, message: "Usuario no encontrado" };
+  }
 
-    localStorage.setItem("user", JSON.stringify(publicUser));
-    setUser(publicUser);
+  const userFromDB = await resp.json();
 
-    return { success: true };
+  // IMPORTANTE: este id SÍ existe en PostgreSQL
+  const publicUser: PublicUser = {
+    id: userFromDB.id,
+    name: userFromDB.nombre,
+    email: userFromDB.correo,
   };
+
+  localStorage.setItem("user", JSON.stringify(publicUser));
+  setUser(publicUser);
+
+  return { success: true };
+};
+
 
   /* ==========================
      REGISTRO — versión original
