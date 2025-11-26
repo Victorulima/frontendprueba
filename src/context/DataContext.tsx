@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-const API = "http://localhost:3000/api";
+const API = "https://tiendaapi-g7-bfczf8e8ckb4cqht.canadacentral-01.azurewebsites.net/api";
 
-// ==== TIPOS ====
 export interface Product {
   id: number;
   name: string;
@@ -49,37 +48,47 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
-  // ======== CARGA INICIAL DESDE BACKEND ========
   useEffect(() => {
     async function loadBackendData() {
       try {
+        console.log("🔵 Cargando desde backend:", API);
+
         const [pRes, uRes] = await Promise.all([
           fetch(`${API}/products`),
           fetch(`${API}/users`)
         ]);
 
+        if (!pRes.ok) throw new Error("Error al obtener productos");
+        if (!uRes.ok) throw new Error("Error al obtener usuarios");
+
         const productsData = await pRes.json();
         const usersData = await uRes.json();
+
+        console.log("🟢 Productos recibidos:", productsData.length);
+        console.log("🟢 Usuarios recibidos:", usersData.length);
 
         setProducts(productsData);
         setUsers(usersData);
 
-        // Categorías generadas desde productos (no existen en backend todavía)
-        const uniqueCategories = Array.from(new Set(productsData.map((p: Product) => p.category)))
-          .map(name => ({ name }));
+        // categorías dinámicas
+        const uniqueCategories = [
+          ...new Set(productsData.map((p: Product) => p.category))
+        ].map(name => ({ name }));
 
         setCategories(uniqueCategories);
 
       } catch (err) {
-        console.error("Error cargando datos del backend:", err);
+        console.error("🔴 Error cargando datos del backend:", err);
+      } finally {
+        setLoaded(true);
       }
     }
 
     loadBackendData();
   }, []);
 
-  // ======= AGREGAR ORDEN LOCAL (Checkout) =======
   const addOrder = (order: Order) => {
     setOrders(prev => [...prev, order]);
   };
@@ -93,6 +102,6 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useData = () => {
   const ctx = useContext(DataContext);
-  if (!ctx) throw new Error("useData debe ser usado dentro de un DataProvider");
+  if (!ctx) throw new Error("useData debe usarse dentro de un DataProvider");
   return ctx;
 };

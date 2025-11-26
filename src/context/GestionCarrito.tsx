@@ -3,6 +3,8 @@ import type { Product } from "../data/productos";
 import { useAuth } from "../context/AuthContext";
 
 export interface CartItem {
+  id?: number;         // ID del registro en BD
+  userId: string;      // EMAIL → usado como ID
   productId: number;
   quantity: number;
   product?: Product;
@@ -22,98 +24,106 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const API = "http://localhost:3000/api";
+// ⬅⬅⬅ USA TU BACKEND REAL
+const API = "https://tiendaapi-g7-bfczf8e8ckb4cqht.canadacentral-01.azurewebsites.net/api";
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   const { user } = useAuth();
-  const userKey = user?.email;   // ← AQUÍ USAMOS EMAIL COMO ID
+  const userKey = user?.email || null;
 
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
-  // ============================
-  // CARGAR CARRITO POR EMAIL
-  // ============================
+  // ==========================================================
+  // 🔵 CARGAR CARRITO DESDE BACKEND
+  // ==========================================================
   useEffect(() => {
-  if (!userKey) return;
+    if (!userKey) return;
 
-  async function loadCart() {
-    try {
-      const res = await fetch(`${API}/cart/${userKey}`);
-      const rawItems = await res.json();
+    async function loadCart() {
+      try {
+        const res = await fetch(`${API}/cart/${userKey}`);
+        const rawItems = await res.json();
 
-      // traer TODOS los productos
-      const prodRes = await fetch(`${API}/products`);
-      const allProducts = await prodRes.json();
+        const prodRes = await fetch(`${API}/products`);
+        const allProducts = await prodRes.json();
 
-      // unir carrito + productos
-      const resolved = rawItems.map((item: CartItem) => ({
-        ...item,
-        product: allProducts.find((p: Product) => p.id === item.productId)
-      }));
+        const resolved = rawItems.map((item: CartItem) => ({
+          ...item,
+          product: allProducts.find((p: Product) => p.id === item.productId)
+        }));
 
-      setItems(resolved);
+        setItems(resolved);
 
-    } catch (err) {
-      console.error("ERROR CART:", err);
+      } catch (err) {
+        console.error("❌ ERROR CARGANDO CARRITO:", err);
+      }
     }
-  }
 
-  loadCart();
-}, [userKey]);
+    loadCart();
+  }, [userKey]);
 
 
+  // ==========================================================
+  // 🔵 ABRIR / CERRAR
+  // ==========================================================
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
 
-  // ============================
-  // ADD TO CART
-  // ============================
-  const addToCart = (p: Product, qty: number = 1) => {
-    if (!userKey) return alert("Inicia sesión primero");
+
+  // ==========================================================
+  // 🔵 AGREGAR PRODUCTO
+  // ==========================================================
+  const addToCart = (product: Product, qty: number = 1) => {
+    if (!userKey) return alert("Debes iniciar sesión");
 
     fetch(`${API}/cart/add`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userId: userKey,
-        productId: p.id,
+        userId: userKey,          // EMAIL
+        productId: product.id,
         quantity: qty,
       }),
     });
 
     setItems(prev => {
-      const exists = prev.find(i => i.productId === p.id);
+      const exists = prev.find(i => i.productId === product.id);
       if (exists) {
         return prev.map(i =>
-          i.productId === p.id ? { ...i, quantity: i.quantity + qty } : i
+          i.productId === product.id ? { ...i, quantity: i.quantity + qty } : i
         );
       }
-      return [...prev, { productId: p.id, quantity: qty, product: p }];
+      return [...prev, { userId: userKey, productId: product.id, quantity: qty, product }];
     });
 
     setIsOpen(true);
   };
 
-  // ============================
-  // REMOVE FROM CART
-  // ============================
+
+  // ==========================================================
+  // 🔵 ELIMINAR PRODUCTO
+  // ==========================================================
   const removeFromCart = (productId: number) => {
     if (!userKey) return;
 
     fetch(`${API}/cart/remove`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: userKey, productId }),
+      body: JSON.stringify({
+        userId: userKey,
+        productId,
+      }),
     });
 
     setItems(prev => prev.filter(i => i.productId !== productId));
   };
 
-  // ============================
-  // INCREASE QTY
-  // ============================
+
+  // ==========================================================
+  // 🔵 AUMENTAR CANTIDAD
+  // ==========================================================
   const increaseQty = (productId: number) => {
     if (!userKey) return;
 
@@ -134,9 +144,10 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     );
   };
 
-  // ============================
-  // DECREASE QTY
-  // ============================
+
+  // ==========================================================
+  // 🔵 DISMINUIR CANTIDAD
+  // ==========================================================
   const decreaseQty = (productId: number) => {
     if (!userKey) return;
 
@@ -161,15 +172,17 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     );
   };
 
-  // ============================
-  // CLEAR CART
-  // ============================
+
+  // ==========================================================
+  // 🔵 LIMPIAR CARRITO
+  // ==========================================================
   const clearCart = () => {
     if (!userKey) return;
 
     fetch(`${API}/cart/clear/${userKey}`, { method: "DELETE" });
     setItems([]);
   };
+
 
   return (
     <CartContext.Provider

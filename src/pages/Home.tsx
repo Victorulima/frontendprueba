@@ -15,10 +15,20 @@ export const Home: React.FC = () => {
   }
 
   // FILTROS DINÁMICOS DESDE BACKEND
-  const bestSellers = products.filter(p => p.isBestSeller && p.isActive !== false).slice(0, 12);
-  const newArrivals = products.filter(p => p.isNew && p.isActive !== false).slice(0, 6);
-  const featuredCategories = categories.slice(0, 3);
-  const newCategories = categories.slice(3, 6);
+  
+// Tomamos los primeros 12 productos como "Más vendidos"
+const bestSellers = products
+  .filter(p => p.isActive !== false)
+  .slice(0, 12);
+
+// Tomamos los últimos 6 como "Nuevos"
+const newArrivals = products
+  .filter(p => p.isActive !== false)
+  .slice(-6);
+
+// Tomamos categorías reales desde DataContext
+const featuredCategories = categories.slice(0, 3);
+const newCategories = categories.slice(3, 6);
 
   return (
     <div className="home-page-final">
