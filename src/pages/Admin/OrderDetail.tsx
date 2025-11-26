@@ -1,10 +1,9 @@
-import React from "react";
 import { useParams, Link } from "react-router-dom";
 import { useData } from "../../context/DataContext"; 
 
 export default function OrderDetail() {
   const { id } = useParams<{ id: string }>();
-  const { orders, cancelOrder } = useData(); 
+  const { orders, cancelOrder } = useData();
 
   const orderData = orders.find((o) => o.id === Number(id));
 
@@ -13,10 +12,11 @@ export default function OrderDetail() {
   }
 
   return (
-    <div className="product-management"> 
+    <div className="product-management">
       <div className="header-actions">
         <h1>Detalle de Orden #{orderData.id}</h1>
       </div>
+
       <div className="detail-card">
         <p><strong>Cliente:</strong> {orderData.cliente}</p>
         <p><strong>Total:</strong> S/ {orderData.total.toFixed(2)}</p>
@@ -24,10 +24,7 @@ export default function OrderDetail() {
         <p><strong>Estado:</strong> {orderData.estado}</p>
 
         {orderData.estado !== "Cancelada" && (
-          <button
-            onClick={() => cancelOrder(orderData.id)} 
-            className="admin-button danger mt-4"
-          >
+          <button onClick={() => cancelOrder(orderData.id)} className="admin-button danger mt-4">
             Cancelar orden
           </button>
         )}
@@ -37,5 +34,5 @@ export default function OrderDetail() {
         </Link>
       </div>
     </div>
-  );
-};
+  );  
+}
