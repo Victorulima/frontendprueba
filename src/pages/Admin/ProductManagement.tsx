@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './ProductManagement.css';
 import { useData } from '../../context/DataContext'; 
-import type { Product } from '../../data/mockData';
+import type { Product } from '../../context/DataContext';
 
 export const ProductManagement: React.FC = () => {
   
@@ -11,7 +11,6 @@ export const ProductManagement: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
 
-  
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
   const [price, setPrice] = useState('');
@@ -19,7 +18,11 @@ export const ProductManagement: React.FC = () => {
   const [image, setImage] = useState('');
 
   const resetForm = () => {
-    setName(''); setCategory(''); setPrice(''); setDescription(''); setImage('');
+    setName('');
+    setCategory('');
+    setPrice('');
+    setDescription('');
+    setImage('');
     setCurrentProduct(null);
   };
 
@@ -31,23 +34,39 @@ export const ProductManagement: React.FC = () => {
   const openEditModal = (product: Product) => {
     setCurrentProduct(product);
     setName(product.name);
-    setCategory(product.category || '');
+    setCategory(product.category);
     setPrice(product.price.toString());
-    setDescription(product.description || '');
-    setImage(product.image || '');
+    setDescription(product.description);
+    setImage(product.image);
     setIsEditModalOpen(true);
   };
   
   const handleAddProduct = (e: React.FormEvent) => {
     e.preventDefault();
-    addProduct({ name, category, price: parseFloat(price), description, image });
+
+    addProduct({
+      name,
+      category,
+      price: parseFloat(price),
+      description,
+      image
+    });
+
     setIsAddModalOpen(false);
   };
 
   const handleEditProduct = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentProduct) return;
-    updateProduct(currentProduct.id, { name, category, price: parseFloat(price), description, image });
+
+    updateProduct(currentProduct.id, {
+      name,
+      category,
+      price: parseFloat(price),
+      description,
+      image
+    });
+
     setIsEditModalOpen(false);
   };
 
@@ -74,7 +93,7 @@ export const ProductManagement: React.FC = () => {
             <tr key={product.id} className={product.isActive === false ? 'product-inactive' : ''}>
               <td>{product.id}</td>
               <td>{product.name}</td>
-              <td>{product.category || 'N/A'}</td>
+              <td>{product.category}</td>
               <td>S/ {product.price.toFixed(2)}</td>
               <td>{product.isActive === false ? 'Inactivo' : 'Activo'}</td>
               <td className="action-buttons">
@@ -91,23 +110,41 @@ export const ProductManagement: React.FC = () => {
         </tbody>
       </table>
 
-      
       {isAddModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
             <h2>Agregar Nuevo Producto</h2>
             <form onSubmit={handleAddProduct}>
-              <div className="form-group"><label>Nombre</label><input type="text" value={name} onChange={e => setName(e.target.value)} required /></div>
+              <div className="form-group">
+                <label>Nombre</label>
+                <input type="text" value={name} onChange={e => setName(e.target.value)} required />
+              </div>
+
               <div className="form-group">
                 <label>Categoría</label>
                 <select value={category} onChange={(e) => setCategory(e.target.value)} required>
-                    <option value="" disabled>Selecciona una categoría</option>
-                    {categories.map(cat => (<option key={cat.id} value={cat.name}>{cat.name}</option>))}
+                  <option value="" disabled>Selecciona una categoría</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.name}>{cat.name}</option>
+                  ))}
                 </select>
               </div>
-              <div className="form-group"><label>Precio</label><input type="number" value={price} onChange={e => setPrice(e.target.value)} required step="0.01" /></div>
-              <div className="form-group"><label>Descripción</label><textarea value={description} onChange={e => setDescription(e.target.value)}></textarea></div>
-              <div className="form-group"><label>URL de la Imagen</label><input type="text" value={image} onChange={e => setImage(e.target.value)} /></div>
+
+              <div className="form-group">
+                <label>Precio</label>
+                <input type="number" step="0.01" value={price} onChange={e => setPrice(e.target.value)} required />
+              </div>
+
+              <div className="form-group">
+                <label>Descripción</label>
+                <textarea value={description} onChange={e => setDescription(e.target.value)} />
+              </div>
+
+              <div className="form-group">
+                <label>URL de la Imagen</label>
+                <input type="text" value={image} onChange={e => setImage(e.target.value)} />
+              </div>
+
               <div className="modal-actions">
                 <button type="button" className="admin-button" onClick={() => setIsAddModalOpen(false)}>Cancelar</button>
                 <button type="submit" className="admin-button success">Guardar Producto</button>
@@ -117,23 +154,41 @@ export const ProductManagement: React.FC = () => {
         </div>
       )}
 
-      
       {isEditModalOpen && currentProduct && (
-         <div className="modal-overlay">
+        <div className="modal-overlay">
           <div className="modal-content">
             <h2>Editar Producto</h2>
             <form onSubmit={handleEditProduct}>
-              <div className="form-group"><label>Nombre</label><input type="text" value={name} onChange={e => setName(e.target.value)} required /></div>
+              <div className="form-group">
+                <label>Nombre</label>
+                <input type="text" value={name} onChange={e => setName(e.target.value)} required />
+              </div>
+
               <div className="form-group">
                 <label>Categoría</label>
                 <select value={category} onChange={(e) => setCategory(e.target.value)} required>
-                    <option value="" disabled>Selecciona una categoría</option>
-                    {categories.map(cat => (<option key={cat.id} value={cat.name}>{cat.name}</option>))}
+                  <option value="" disabled>Selecciona una categoría</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.name}>{cat.name}</option>
+                  ))}
                 </select>
               </div>
-              <div className="form-group"><label>Precio</label><input type="number" value={price} onChange={e => setPrice(e.target.value)} required step="0.01" /></div>
-              <div className="form-group"><label>Descripción</label><textarea value={description} onChange={e => setDescription(e.target.value)}></textarea></div>
-              <div className="form-group"><label>URL de la Imagen</label><input type="text" value={image} onChange={e => setImage(e.target.value)} /></div>
+
+              <div className="form-group">
+                <label>Precio</label>
+                <input type="number" step="0.01" value={price} onChange={e => setPrice(e.target.value)} required />
+              </div>
+
+              <div className="form-group">
+                <label>Descripción</label>
+                <textarea value={description} onChange={e => setDescription(e.target.value)} />
+              </div>
+
+              <div className="form-group">
+                <label>URL de la Imagen</label>
+                <input type="text" value={image} onChange={e => setImage(e.target.value)} />
+              </div>
+
               <div className="modal-actions">
                 <button type="button" className="admin-button" onClick={() => setIsEditModalOpen(false)}>Cancelar</button>
                 <button type="submit" className="admin-button success">Guardar Cambios</button>

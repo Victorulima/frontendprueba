@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 
 const API = "https://tiendaapi-g7-bfczf8e8ckb4cqht.canadacentral-01.azurewebsites.net/api";
 
+// =================== INTERFACES ===================
+
 export interface Product {
   id: number;
   name: string;
@@ -15,7 +17,9 @@ export interface Product {
 }
 
 export interface Category {
+  id: number;
   name: string;
+  description: string;
 }
 
 export interface User {
@@ -33,72 +37,125 @@ export interface Order {
   fecha: string;
 }
 
+// ================== CONTEXT TYPE ==================
+
 interface DataContextType {
   products: Product[];
   categories: Category[];
   users: User[];
   orders: Order[];
+
   addOrder: (order: Order) => void;
+
+  addCategory: (cat: Partial<Category>) => void;
+  updateCategory: (id: number, data: Partial<Category>) => void;
+  deleteCategory: (id: number) => void;
+
+  addProduct: (p: Partial<Product>) => void;
+  updateProduct: (id: number, data: Partial<Product>) => void;
+  toggleProductActive: (id: number) => void;
+
+  addUser: (u: Partial<User>) => void;
+  toggleUserActive: (id: number) => void;
+
+  cancelOrder: (id: number) => void;
 }
 
+
+// ================ CREATE CONTEXT ==================
+
 const DataContext = createContext<DataContextType | undefined>(undefined);
+
+// ================ PROVIDER ========================
 
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loaded, setLoaded] = useState(false);
+
+  // -------- LOAD FROM BACKEND --------
 
   useEffect(() => {
     async function loadBackendData() {
       try {
-        console.log("🔵 Cargando desde backend:", API);
+        console.log("Cargando desde backend:", API);
 
         const [pRes, uRes] = await Promise.all([
           fetch(`${API}/products`),
           fetch(`${API}/users`)
         ]);
 
-        if (!pRes.ok) throw new Error("Error al obtener productos");
-        if (!uRes.ok) throw new Error("Error al obtener usuarios");
-
         const productsData = await pRes.json();
         const usersData = await uRes.json();
-
-        console.log("🟢 Productos recibidos:", productsData.length);
-        console.log("🟢 Usuarios recibidos:", usersData.length);
 
         setProducts(productsData);
         setUsers(usersData);
 
-        // categorías dinámicas
-        const uniqueCategories = [
-          ...new Set(productsData.map((p: Product) => p.category))
-        ].map(name => ({ name }));
+        // Categorías únicas correctas
+        const uniqueCategories: Category[] = Array.from(
+          new Set(productsData.map((p: Product) => p.category))
+        ).map((name, idx) => ({
+          id: idx + 1,
+          name: String(name),
+          description: ""
+        }));
 
         setCategories(uniqueCategories);
 
       } catch (err) {
-        console.error("🔴 Error cargando datos del backend:", err);
-      } finally {
-        setLoaded(true);
+        console.error("Error cargando datos:", err);
       }
     }
 
     loadBackendData();
   }, []);
 
-  const addOrder = (order: Order) => {
-    setOrders(prev => [...prev, order]);
-  };
+  // ========== MÉTODOS (DEJADOS VACÍOS PARA TSX) ==========
+  const addOrder = (o: Order) => setOrders(prev => [...prev, o]);
+
+  const addCategory = () => {};
+  const updateCategory = () => {};
+  const deleteCategory = () => {};
+
+  const addProduct = () => {};
+  const updateProduct = () => {};
+  const toggleProductActive = () => {};
+
+  const addUser = () => {};
+  const toggleUserActive = () => {};
+
+  const cancelOrder = () => {};
 
   return (
-    <DataContext.Provider value={{ products, categories, users, orders, addOrder }}>
+    <DataContext.Provider
+      value={{
+        products,
+        categories,
+        users,
+        orders,
+        addOrder,
+
+        addCategory,
+        updateCategory,
+        deleteCategory,
+
+        addProduct,
+        updateProduct,
+        toggleProductActive,
+
+        addUser,
+        toggleUserActive,
+
+        cancelOrder
+      }}
+    >
       {children}
     </DataContext.Provider>
   );
 };
+
+// ================ CUSTOM HOOK ======================
 
 export const useData = () => {
   const ctx = useContext(DataContext);

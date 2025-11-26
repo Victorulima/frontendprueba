@@ -7,7 +7,7 @@ export interface CartItem {
   userId: string;      // EMAIL → usado como ID
   productId: number;
   quantity: number;
-  product?: Product;
+  product: Product;
 }
 
 interface CartContextType {

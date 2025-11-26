@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useState, useContext, useEffect } from "react";
 
 type StoredUser = {
   id: number;
@@ -17,7 +17,7 @@ type AuthResult = { success: boolean; message?: string };
 
 interface AuthContextType {
   user: PublicUser | null;
-  login: (email: string, password: string) => Promise<AuthResult>;
+  login: (email: string, password?: string) => Promise<AuthResult>;
   register: (name: string, email: string, password: string) => Promise<AuthResult>;
   logout: () => void;
   updateUser: (data: Partial<Pick<StoredUser, "name">>) => Promise<AuthResult>;
@@ -26,12 +26,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const API = "https://tiendaapi-g7-bfczf8e8ckb4cqht.canadacentral-01.azurewebsites.net/api";
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<PublicUser | null>(null);
 
-  /* ==========================
-     Cargar user desde localStorage
-  =========================== */
   useEffect(() => {
     const saved = localStorage.getItem("user");
     if (saved) {
@@ -44,8 +43,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   /* ==========================
-     Helpers usuarios locales
-  =========================== */
+     Helpers almacenamiento local
+  ========================== */
   const readStoredUsers = (): StoredUser[] => {
     try {
       return JSON.parse(localStorage.getItem("users") || "[]");
@@ -59,52 +58,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   /* ==========================
-     LOGIN — versión original
-     Busca email + password en localStorage
+     LOGIN con backend Azure
   =========================== */
-  const login = async (email: string, password: string): Promise<AuthResult> => {
+  const login = async (email: string): Promise<AuthResult> => {
+    try {
+      const resp = await fetch(`${API}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ correo: email })
+      });
 
-  const resp = await fetch(`http://localhost:3000/api/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ correo: email })
-  });
+      if (!resp.ok) {
+        return { success: false, message: "Usuario no encontrado" };
+      }
 
-  if (!resp.ok) {
-    return { success: false, message: "Usuario no encontrado" };
-  }
+      const userDB = await resp.json();
 
-  const userFromDB = await resp.json();
+      const publicUser: PublicUser = {
+        id: userDB.id,
+        name: userDB.nombre,
+        email: userDB.correo
+      };
 
-  // IMPORTANTE: este id SÍ existe en PostgreSQL
-  const publicUser: PublicUser = {
-    id: userFromDB.id,
-    name: userFromDB.nombre,
-    email: userFromDB.correo,
+      localStorage.setItem("user", JSON.stringify(publicUser));
+      setUser(publicUser);
+
+      return { success: true };
+    } catch {
+      return { success: false, message: "Error de conexión al servidor" };
+    }
   };
 
-  localStorage.setItem("user", JSON.stringify(publicUser));
-  setUser(publicUser);
-
-  return { success: true };
-};
-
-
   /* ==========================
-     REGISTRO — versión original
+     REGISTRO (sin backend real)
   =========================== */
   const register = async (name: string, email: string, password: string): Promise<AuthResult> => {
     if (!name || !email || !password)
       return { success: false, message: "Todos los campos son obligatorios" };
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) return { success: false, message: "Correo inválido" };
-
-    if (password.length < 6)
-      return { success: false, message: "La contraseña debe tener al menos 6 caracteres" };
-
     const users = readStoredUsers();
-
     if (users.some((u) => u.email === email)) {
       return { success: false, message: "El correo ya está en uso" };
     }
@@ -146,7 +138,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const users = readStoredUsers();
     const index = users.findIndex(u => u.email === user.email);
-
     if (index === -1) return { success: false, message: "Usuario no encontrado" };
 
     const updated = { ...users[index], ...data };
@@ -162,7 +153,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem("user", JSON.stringify(publicUser));
     setUser(publicUser);
 
-    return { success: true, message: "Datos actualizados correctamente" };
+    return { success: true };
   };
 
   /* ==========================
@@ -173,10 +164,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     oldPass: string,
     newPass: string
   ): Promise<AuthResult> => {
+
     const users = readStoredUsers();
     const userStored = users.find(u => u.email === email);
 
-    if (!userStored) return { success: false, message: "Usuario no encontrado." };
+    if (!userStored) return { success: false, message: "Usuario no encontrado" };
     if (userStored.password !== oldPass)
       return { success: false, message: "La contraseña actual es incorrecta." };
     if (newPass.length < 6)

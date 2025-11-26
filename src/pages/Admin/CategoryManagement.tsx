@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './CategoryManagement.css';
 import { useData } from '../../context/DataContext'; 
-import type { Category } from '../../data/mockData';
+import type { Category } from '../../context/DataContext';
 
 export const CategoryManagement: React.FC = () => {
  
@@ -13,7 +13,9 @@ export const CategoryManagement: React.FC = () => {
   const [description, setDescription] = useState('');
 
   const resetForm = () => {
-    setName(''); setDescription(''); setCurrentCategory(null);
+    setName('');
+    setDescription('');
+    setCurrentCategory(null);
   };
 
   const openModal = (category: Category | null) => {
@@ -34,11 +36,14 @@ export const CategoryManagement: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     if (currentCategory) {
+      // Ahora es compatible con el DataContext flexible
       updateCategory(currentCategory.id, { name, description });
     } else {
       addCategory({ name, description });
     }
+
     closeModal();
   };
   
@@ -72,13 +77,17 @@ export const CategoryManagement: React.FC = () => {
               <td>{category.description}</td>
               <td className="action-buttons">
                 <button className="admin-button" onClick={() => openModal(category)}>Editar</button>
-                <button className="admin-button danger" onClick={() => handleDelete(category.id)}>Eliminar</button>
+                <button 
+                  className="admin-button danger" 
+                  onClick={() => handleDelete(category.id)}>
+                    Eliminar
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      
+
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
