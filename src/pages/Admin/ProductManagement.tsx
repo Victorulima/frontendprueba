@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import './ProductManagement.css';
-import { useData } from '../../context/DataContext'; 
-import type { Product } from '../../context/DataContext';
+import { useData, type Product } from '../../context/DataContext';
 
 export const ProductManagement: React.FC = () => {
-  
   const { products, categories, addProduct, updateProduct, toggleProductActive } = useData();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -41,25 +39,31 @@ export const ProductManagement: React.FC = () => {
     setIsEditModalOpen(true);
   };
   
-  const handleAddProduct = (e: React.FormEvent) => {
+  const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    addProduct({
+    const success = await addProduct({
       name,
       category,
       price: parseFloat(price),
       description,
-      image
+      image,
+      isActive: true
     });
 
-    setIsAddModalOpen(false);
+    if (success) {
+      setIsAddModalOpen(false);
+      resetForm();
+    } else {
+      alert("Error al guardar en el servidor.");
+    }
   };
 
-  const handleEditProduct = (e: React.FormEvent) => {
+  const handleEditProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentProduct) return;
 
-    updateProduct(currentProduct.id, {
+    const success = await updateProduct(currentProduct.id, {
       name,
       category,
       price: parseFloat(price),
@@ -67,7 +71,19 @@ export const ProductManagement: React.FC = () => {
       image
     });
 
-    setIsEditModalOpen(false);
+    if (success) {
+      setIsEditModalOpen(false);
+      resetForm();
+    } else {
+      alert("Error al actualizar en el servidor.");
+    }
+  };
+
+  const handleToggleActive = async (product: Product) => {
+    const success = await toggleProductActive(product.id, product.isActive);
+    if (!success) {
+      alert("Error al cambiar el estado.");
+    }
   };
 
   return (
@@ -90,19 +106,19 @@ export const ProductManagement: React.FC = () => {
         </thead>
         <tbody>
           {products.map((product) => (
-            <tr key={product.id} className={product.isActive === false ? 'product-inactive' : ''}>
+            <tr key={product.id} className={!product.isActive ? 'product-inactive' : ''}>
               <td>{product.id}</td>
               <td>{product.name}</td>
               <td>{product.category}</td>
               <td>S/ {product.price.toFixed(2)}</td>
-              <td>{product.isActive === false ? 'Inactivo' : 'Activo'}</td>
+              <td>{product.isActive ? 'Activo' : 'Inactivo'}</td>
               <td className="action-buttons">
                 <button className="admin-button" onClick={() => openEditModal(product)}>Editar</button>
                 <button 
-                  className={`admin-button ${product.isActive === false ? 'success' : 'danger'}`}
-                  onClick={() => toggleProductActive(product.id)}
+                  className={`admin-button ${!product.isActive ? 'success' : 'danger'}`}
+                  onClick={() => handleToggleActive(product)}
                 >
-                  {product.isActive === false ? 'Activar' : 'Desactivar'}
+                  {product.isActive ? 'Desactivar' : 'Activar'}
                 </button>
               </td>
             </tr>
@@ -147,7 +163,7 @@ export const ProductManagement: React.FC = () => {
 
               <div className="modal-actions">
                 <button type="button" className="admin-button" onClick={() => setIsAddModalOpen(false)}>Cancelar</button>
-                <button type="submit" className="admin-button success">Guardar Producto</button>
+                <button type="submit" className="admin-button success">Guardar</button>
               </div>
             </form>
           </div>
