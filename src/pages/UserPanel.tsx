@@ -2,35 +2,37 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-interface BackendOrder {
+const API =
+  "https://tiendaapi-g7-bfczf8e8ckb4cqht.canadacentral-01.azurewebsites.net/api";
+
+interface Order {
   id: number;
-  cliente: string | number;
+  cliente: string;
   total: number;
   estado: string;
   fecha: string;
 }
 
-export const UserPanel: React.FC = () => {
-  const API = "http://localhost:3000/api";
+const UserPanel: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [orders, setOrders] = useState<BackendOrder[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ------------------------- Cargar órdenes -------------------------
   useEffect(() => {
-    const loadOrders = async () => {
-      if (!user) return;
+    if (!user) return;
 
+    const fetchOrders = async () => {
       try {
-        const resp = await fetch(`${API}/orders`);
-        const data = await resp.json();
+        const res = await fetch(`${API}/orders`);
+        const data = await res.json();
 
-        // Filtrar por correo (el backend actual guarda "cliente": nombre)
-        const filtered = data.filter(
-          (o: BackendOrder) =>
-            String(o.cliente).toLowerCase().includes(user.email.split("@")[0])
+        // Filtrar por correo o nombre de usuario
+        const filtered = data.filter((o: Order) =>
+          String(o.cliente)
+            .toLowerCase()
+            .includes(user.email.split("@")[0].toLowerCase())
         );
 
         setOrders(filtered);
@@ -41,7 +43,7 @@ export const UserPanel: React.FC = () => {
       setLoading(false);
     };
 
-    loadOrders();
+    fetchOrders();
   }, [user]);
 
   if (!user) {
@@ -56,7 +58,7 @@ export const UserPanel: React.FC = () => {
     <div style={{ maxWidth: 900, margin: "20px auto", padding: 20 }}>
       <h1 style={{ marginBottom: 20 }}>Mi Cuenta</h1>
 
-      {/* ----------------------- DATOS DEL USUARIO ----------------------- */}
+      {/* ----------------------- Datos del Usuario ----------------------- */}
       <div
         style={{
           background: "#f7efe0",
@@ -67,8 +69,12 @@ export const UserPanel: React.FC = () => {
         }}
       >
         <h2>Información del usuario</h2>
-        <p><strong>Nombre:</strong> {user.name}</p>
-        <p><strong>Correo:</strong> {user.email}</p>
+        <p>
+          <strong>Nombre:</strong> {user.name}
+        </p>
+        <p>
+          <strong>Correo:</strong> {user.email}
+        </p>
 
         <button
           onClick={() => {
@@ -88,7 +94,7 @@ export const UserPanel: React.FC = () => {
         </button>
       </div>
 
-      {/* ----------------------- ÓRDENES ----------------------- */}
+      {/* ----------------------- Órdenes ----------------------- */}
       <div
         style={{
           background: "#f7efe0",
@@ -114,10 +120,18 @@ export const UserPanel: React.FC = () => {
                   borderBottom: "1px dashed #6b4b2a",
                 }}
               >
-                <div><strong>ID:</strong> {order.id}</div>
-                <div><strong>Total:</strong> S/ {order.total.toFixed(2)}</div>
-                <div><strong>Estado:</strong> {order.estado}</div>
-                <div><strong>Fecha:</strong> {order.fecha}</div>
+                <div>
+                  <strong>ID:</strong> {order.id}
+                </div>
+                <div>
+                  <strong>Total:</strong> S/ {order.total.toFixed(2)}
+                </div>
+                <div>
+                  <strong>Estado:</strong> {order.estado}
+                </div>
+                <div>
+                  <strong>Fecha:</strong> {order.fecha}
+                </div>
               </li>
             ))}
           </ul>
@@ -126,3 +140,5 @@ export const UserPanel: React.FC = () => {
     </div>
   );
 };
+
+export default UserPanel;
