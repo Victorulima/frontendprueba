@@ -1,92 +1,57 @@
 import React from "react";
-import type { Product } from "../context/DataContext";
-import { useCart } from "../context/GestionCarrito";
 import { Link } from "react-router-dom";
+import { useCart } from "../context/GestionCarrito";
 
-const cardStyle: React.CSSProperties = { 
-  background: "#f7efe0", 
-  border: "1px solid #6b4b2a", 
-  borderRadius: 8, 
-  overflow: "hidden", 
-  boxShadow: "2px 3px 8px rgba(0,0,0,0.12)", 
-  display: "flex", 
-  flexDirection: "column" 
-};
-
-const imgStyle: React.CSSProperties = { 
-  width: "100%", 
-  height: 160, 
-  objectFit: "cover", 
-  display: "block" 
-};
-
-const bodyStyle: React.CSSProperties = { 
-  padding: 12, 
-  display: "flex", 
-  flexDirection: "column", 
-  gap: 8, 
-  flex: 1 
-};
-
-const buttonContainerStyle: React.CSSProperties = { 
-  padding: "0 12px 12px" 
-};
-
-const buttonStyle: React.CSSProperties = { 
-  width: "100%", 
-  background: "#b8860b", 
-  color: "#fff", 
-  border: "1px solid #6b4b2a", 
-  padding: "8px 10px", 
-  borderRadius: 6, 
-  cursor: "pointer", 
-  boxShadow: "inset 0 -2px rgba(0,0,0,0.15)" 
-};
+// Define la interfaz aquí o impórtala si ya la tienes en otro lado
+export interface Product {
+  id: number;
+  name: string;
+  category: string;
+  price: number;
+  description: string;
+  image: string;
+  isActive: boolean;
+  isBestSeller?: boolean;
+  isNew?: boolean;
+}
 
 export const ProductCard: React.FC<{ p: Product }> = ({ p }) => {
   const { addToCart } = useCart();
+  
+  // Imagen por defecto si viene vacía
+  const imgUrl = p.image && p.image.startsWith('http') 
+    ? p.image 
+    : `https://via.placeholder.com/300?text=${p.name.replace(/ /g, '+')}`;
 
   return (
-    <div style={cardStyle}>
-
-      {/* LINK AL DETALLE DEL PRODUCTO */}
-      <Link 
-        to={`/product/${p.id}`} 
-        style={{ 
-          textDecoration: "none", 
-          color: "inherit", 
-          display: "flex", 
-          flexDirection: "column", 
-          flex: 1 
-        }}
-      >
+    <div className="product-card" style={{ border: '1px solid #ddd', borderRadius: '8px', overflow: 'hidden', background: '#fff' }}>
+      <Link to={`/product/${p.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
         <img 
-          src={p.image || `https://via.placeholder.com/300x300.png?text=${p.name.replace(/\s/g, "+")}`} 
+          src={imgUrl} 
           alt={p.name} 
-          style={imgStyle} 
+          style={{ width: '100%', height: '200px', objectFit: 'cover' }} 
         />
-
-        <div style={bodyStyle}>
-          <div>
-            <div style={{ fontWeight: 700 }}>{p.name}</div>
-            <div style={{ color: "#5b4632", fontSize: 13, minHeight: "3em", marginTop: 4 }}>
-              {p.description}
-            </div>
-          </div>
-
-          <div style={{ marginTop: "auto", fontWeight: 700 }}>
-            S/ {p.price.toFixed(2)}
+        <div style={{ padding: '1rem' }}>
+          <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.1rem' }}>{p.name}</h3>
+          <p style={{ color: '#666', fontSize: '0.9rem', height: '40px', overflow: 'hidden' }}>
+            {p.description}
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
+            <span style={{ fontWeight: 'bold', fontSize: '1.2rem', color: '#b8860b' }}>
+              S/ {p.price}
+            </span>
           </div>
         </div>
       </Link>
-
-      {/* BOTÓN AGREGAR AL CARRITO */}
-      <div style={buttonContainerStyle}>
+      <div style={{ padding: '0 1rem 1rem' }}>
         <button 
-          onClick={() => addToCart(p)} 
-          style={buttonStyle}
+          onClick={() => addToCart(p)}
+          style={{ 
+            width: '100%', padding: '10px', background: '#3f2a17', 
+            color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' 
+          }}
         >
-          Agregar
+          Agregar al Carrito
         </button>
       </div>
     </div>
