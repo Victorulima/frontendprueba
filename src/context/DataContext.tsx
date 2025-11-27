@@ -1,8 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
-const API = "https://tiendaapi-g7-bfczf8e8ckb4cqht.canadacentral-01.azurewebsites.net/api";
-
-// =================== INTERFACES ===================
+const API_URL = "https://tiendaapi-g7-bfczf8e8ckb4cqht.canadacentral-01.azurewebsites.net/api";
 
 export interface Product {
   id: number;
@@ -11,9 +9,7 @@ export interface Product {
   price: number;
   description: string;
   image: string;
-  isActive?: boolean;
-  isBestSeller?: boolean;
-  isNew?: boolean;
+  isActive: boolean;
 }
 
 export interface Category {
@@ -37,128 +33,139 @@ export interface Order {
   fecha: string;
 }
 
-// ================== CONTEXT TYPE ==================
-
 interface DataContextType {
   products: Product[];
   categories: Category[];
   users: User[];
   orders: Order[];
-
-  addOrder: (order: Order) => void;
-
-  addCategory: (cat: Partial<Category>) => void;
-  updateCategory: (id: number, data: Partial<Category>) => void;
-  deleteCategory: (id: number) => void;
-
-  addProduct: (p: Partial<Product>) => void;
-  updateProduct: (id: number, data: Partial<Product>) => void;
-  toggleProductActive: (id: number) => void;
-
-  addUser: (u: Partial<User>) => void;
+  
+  addProduct: (data: Omit<Product, 'id'>) => Promise<boolean>;
+  updateProduct: (id: number, data: Partial<Product>) => Promise<boolean>;
+  toggleProductActive: (id: number, currentStatus: boolean) => Promise<boolean>;
+  
+  addCategory: (data: Omit<Category, 'id'>) => Promise<boolean>;
+  updateCategory: (id: number, data: Partial<Category>) => Promise<boolean>;
+  deleteCategory: (id: number) => Promise<boolean>;
+  
+  addOrder: (order: any) => void;
+  addUser: (user: any) => void;
   toggleUserActive: (id: number) => void;
-
   cancelOrder: (id: number) => void;
+  
+  refreshData: () => void;
 }
-
-
-// ================ CREATE CONTEXT ==================
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-// ================ PROVIDER ========================
-
-export const DataProvider = ({ children }: { children: React.ReactNode }) => {
+export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
 
-  // -------- LOAD FROM BACKEND --------
+  const refreshData = async () => {
+    try {
+      const [prodRes, catRes, userRes, orderRes] = await Promise.all([
+        fetch(`${API_URL}/products`),
+        fetch(`${API_URL}/categories`).catch(() => null),
+        fetch(`${API_URL}/users`),
+        fetch(`${API_URL}/orders`)
+      ]);
+
+      if (prodRes.ok) setProducts(await prodRes.json());
+      if (catRes && catRes.ok) setCategories(await catRes.json());
+      if (userRes.ok) setUsers(await userRes.json());
+      if (orderRes.ok) setOrders(await orderRes.json());
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
-    async function loadBackendData() {
-      try {
-        console.log("Cargando desde backend:", API);
-
-        const [pRes, uRes] = await Promise.all([
-          fetch(`${API}/products`),
-          fetch(`${API}/users`)
-        ]);
-
-        const productsData = await pRes.json();
-        const usersData = await uRes.json();
-
-        setProducts(productsData);
-        setUsers(usersData);
-
-        // Categorías únicas correctas
-        const uniqueCategories: Category[] = Array.from(
-          new Set(productsData.map((p: Product) => p.category))
-        ).map((name, idx) => ({
-          id: idx + 1,
-          name: String(name),
-          description: ""
-        }));
-
-        setCategories(uniqueCategories);
-
-      } catch (err) {
-        console.error("Error cargando datos:", err);
-      }
-    }
-
-    loadBackendData();
+    refreshData();
   }, []);
 
-  // ========== MÉTODOS (DEJADOS VACÍOS PARA TSX) ==========
-  const addOrder = (o: Order) => setOrders(prev => [...prev, o]);
+  const addProduct = async (data: Omit<Product, 'id'>) => {
+    try {
+      const res = await fetch(`${API_URL}/products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) { refreshData(); return true; }
+    } catch (e) { console.error(e); }
+    return false;
+  };
 
-  const addCategory = () => {};
-  const updateCategory = () => {};
-  const deleteCategory = () => {};
+  const updateProduct = async (id: number, data: Partial<Product>) => {
+    try {
+      const res = await fetch(`${API_URL}/products/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) { refreshData(); return true; }
+    } catch (e) { console.error(e); }
+    return false;
+  };
 
-  const addProduct = () => {};
-  const updateProduct = () => {};
-  const toggleProductActive = () => {};
+  const toggleProductActive = async (id: number, currentStatus: boolean) => {
+    return updateProduct(id, { isActive: !currentStatus });
+  };
 
+  const addCategory = async (data: Omit<Category, 'id'>) => {
+    try {
+      const res = await fetch(`${API_URL}/categories`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) { refreshData(); return true; }
+    } catch (e) { console.error(e); }
+    return false;
+  };
+
+  const updateCategory = async (id: number, data: Partial<Category>) => {
+    try {
+      const res = await fetch(`${API_URL}/categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) { refreshData(); return true; }
+    } catch (e) { console.error(e); }
+    return false;
+  };
+
+  const deleteCategory = async (id: number) => {
+    try {
+      const res = await fetch(`${API_URL}/categories/${id}`, { method: 'DELETE' });
+      if (res.ok) { refreshData(); return true; }
+    } catch (e) { console.error(e); }
+    return false;
+  };
+
+  const addOrder = () => {};
   const addUser = () => {};
   const toggleUserActive = () => {};
-
   const cancelOrder = () => {};
 
   return (
-    <DataContext.Provider
-      value={{
-        products,
-        categories,
-        users,
-        orders,
-        addOrder,
-
-        addCategory,
-        updateCategory,
-        deleteCategory,
-
-        addProduct,
-        updateProduct,
-        toggleProductActive,
-
-        addUser,
-        toggleUserActive,
-
-        cancelOrder
-      }}
-    >
+    <DataContext.Provider value={{ 
+      products, categories, users, orders,
+      addProduct, updateProduct, toggleProductActive,
+      addCategory, updateCategory, deleteCategory,
+      addOrder, addUser, toggleUserActive, cancelOrder,
+      refreshData
+    }}>
       {children}
     </DataContext.Provider>
   );
 };
 
-// ================ CUSTOM HOOK ======================
-
 export const useData = () => {
-  const ctx = useContext(DataContext);
-  if (!ctx) throw new Error("useData debe usarse dentro de un DataProvider");
-  return ctx;
+  const context = useContext(DataContext);
+  if (!context) throw new Error("useData debe usarse dentro de DataProvider");
+  return context;
 };

@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import './CategoryManagement.css';
-import { useData } from '../../context/DataContext'; 
-import type { Category } from '../../context/DataContext';
+import { useData, type Category } from '../../context/DataContext';
 
 export const CategoryManagement: React.FC = () => {
- 
   const { categories, addCategory, updateCategory, deleteCategory } = useData();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,27 +27,28 @@ export const CategoryManagement: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    resetForm();
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    let success = false;
+    
     if (currentCategory) {
-      // Ahora es compatible con el DataContext flexible
-      updateCategory(currentCategory.id, { name, description });
+      success = await updateCategory(currentCategory.id, { name, description });
     } else {
-      addCategory({ name, description });
+      success = await addCategory({ name, description });
     }
 
-    closeModal();
+    if (success) {
+      setIsModalOpen(false);
+      resetForm();
+    } else {
+      alert("Error al guardar la categoría.");
+    }
   };
   
-  const handleDelete = (categoryId: number) => {
+  const handleDelete = async (categoryId: number) => {
     if (window.confirm('¿Estás seguro de que quieres eliminar esta categoría?')) {
-        deleteCategory(categoryId);
+        const success = await deleteCategory(categoryId);
+        if (!success) alert("Error al eliminar la categoría.");
     }
   };
 
@@ -77,36 +76,32 @@ export const CategoryManagement: React.FC = () => {
               <td>{category.description}</td>
               <td className="action-buttons">
                 <button className="admin-button" onClick={() => openModal(category)}>Editar</button>
-                <button 
-                  className="admin-button danger" 
-                  onClick={() => handleDelete(category.id)}>
-                    Eliminar
-                </button>
+                <button className="admin-button danger" onClick={() => handleDelete(category.id)}>Eliminar</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-
+      
       {isModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>{currentCategory ? 'Editar' : 'Agregar'} Categoría</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label>Nombre</label>
-                <input type="text" value={name} onChange={e => setName(e.target.value)} required />
-              </div>
-              <div className="form-group">
-                <label>Descripción</label>
-                <textarea value={description} onChange={e => setDescription(e.target.value)}></textarea>
-              </div>
-              <div className="modal-actions">
-                <button type="button" className="admin-button" onClick={closeModal}>Cancelar</button>
-                <button type="submit" className="admin-button success">Guardar</button>
-              </div>
-            </form>
-          </div>
+            <div className="modal-content">
+                <h2>{currentCategory ? 'Editar' : 'Agregar'} Categoría</h2>
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label>Nombre</label>
+                        <input type="text" value={name} onChange={e => setName(e.target.value)} required />
+                    </div>
+                    <div className="form-group">
+                        <label>Descripción</label>
+                        <textarea value={description} onChange={e => setDescription(e.target.value)}></textarea>
+                    </div>
+                    <div className="modal-actions">
+                        <button type="button" className="admin-button" onClick={() => setIsModalOpen(false)}>Cancelar</button>
+                        <button type="submit" className="admin-button success">Guardar</button>
+                    </div>
+                </form>
+            </div>
         </div>
       )}
     </div>
